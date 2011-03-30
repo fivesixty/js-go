@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="assets/go.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <script src="assets/go.js"></script>
+    <script>
+      $(document).ready(function () {
+        var board = new HTMLBoard($("#game"));
+        window.game = new GameLogic(19, 19, board);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="game"></div>
+  </body>
+</html>
