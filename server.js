@@ -150,10 +150,15 @@ socket.on('connection', function(client){
         }
         break;
       case "gameleave":
-        if (client.game.black.sessionId === client.sessionId) {
-          client.game.white.send(data);
-        } else {
-          client.game.black.send(data);
+        if (client.game) {
+          if (client.game.black.sessionId === client.sessionId) {
+            client.game.white.send(data);
+            client.game.white.game = undefined;
+          } else {
+            client.game.black.send(data);
+            client.game.black.game = undefined;
+          }
+          client.game = undefined;
         }
         break;
     }
@@ -161,7 +166,15 @@ socket.on('connection', function(client){
   }); 
   client.on('disconnect', function(){
     client.inChat = false;
-    
+    if (client.game) {
+      if (client.game.white.sessionId === client.sessionId) {
+        client.game.black.send(JSON.stringify({type:"gameleave"}));
+        client.game.black.game = undefined;
+      } else {
+        client.game.white.send(JSON.stringify({type:"gameleave"}));
+        client.game.white.game = undefined;
+      }
+    }
     broadcastToChatters("userleave", client);
   });
 });
