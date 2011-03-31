@@ -26,10 +26,11 @@ function htmlEscape(text) {
 var socket = io.listen(server);
 
 function getChatters(callback) {
-  _(socket.clients).chain()
+  var chatters = _(socket.clients).chain()
     .select(function (client) { return client.inChat === true; })
     .map(function (client) { return callback(client.sessionId, client); })
     .value();
+  return chatters;
 }
 
 function broadcastToChatters(message, from, payload) {
@@ -60,6 +61,16 @@ function acceptChallenge(target, sender) {
   target.game = game;
   
   challengeMessage(target, sender, "acceptChallenge");
+}
+
+function withOpponent(client, callback) {
+  if (client.game) {
+    if (client.game.black.sessionId === client.sessionId) {
+      callback(client.game.white);
+    } else {
+      callback(client.game.black);
+    }
+  }
 }
 
 socket.on('connection', function(client) { 
@@ -109,49 +120,31 @@ socket.on('connection', function(client) {
         acceptChallenge(socket.clients[message.payload.id], client);
         break;
       case "gamemove":
-        if (client.game) {
-          if (message.payload.side === "white") {
-            client.game.black.send(data);
-          } else {
-            client.game.white.send(data);
-          }
-        }
+        withOpponent(client, function (opponent) {
+          opponent.send(data);
+        });
         break;
       case "gamemessage":
-        if (client.game) {
-          if (client.game.black.sessionId === client.sessionId) {
-            client.game.white.send(data);
-          } else {
-            client.game.black.send(data);
-          }
-        }
+        withOpponent(client, function (opponent) {
+          opponent.send(data);
+        });
         break;
       case "gameleave":
-        if (client.game) {
-          if (client.game.black.sessionId === client.sessionId) {
-            client.game.white.send(data);
-            client.game.white.game = undefined;
-          } else {
-            client.game.black.send(data);
-            client.game.black.game = undefined;
-          }
-          client.game = undefined;
-        }
+        withOpponent(client, function (opponent) {
+          opponent.send(data);
+          opponent.game = undefined;
+        });
+        client.game = undefined;
         break;
     }
     
   });
   client.on('disconnect', function(){
     client.inChat = false;
-    if (client.game) {
-      if (client.game.white.sessionId === client.sessionId) {
-        client.game.black.send(JSON.stringify({type:"gameleave"}));
-        client.game.black.game = undefined;
-      } else {
-        client.game.white.send(JSON.stringify({type:"gameleave"}));
-        client.game.white.game = undefined;
-      }
-    }
+    withOpponent(client, function (opponent) {
+      opponent.send(JSON.stringify({type:"gameleave"}));
+      opponent.game = undefined;
+    });
     broadcastToChatters("userleave", client);
   });
 });
