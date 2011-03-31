@@ -1,7 +1,8 @@
 var http = require("http"),
     io = require('socket.io'),
     url = require('url'),
-    static = require('node-static');
+    static = require('node-static'),
+    _ = require('underscore');
 
 var fileServer = new static.Server("./assets", { cache: false });
 
@@ -25,27 +26,25 @@ function htmlEscape(text) {
 var socket = io.listen(server);
 
 function getChatters(callback) {
-  var chatters = [];
-  for (var clientid in socket.clients) {
-    if (socket.clients[clientid].inChat === true) {
-      chatters.push(callback(clientid, socket.clients[clientid]));
-    }
-  }
-  return chatters;
+  _(socket.clients).chain()
+    .select(function (client) { return client.inChat === true; })
+    .map(function (client) { return callback(client.sessionId, client); })
+    .value();
 }
 
 function broadcastToChatters(message, from, payload) {
-  var data;
+  var data = JSON.stringify({
+    type:message,
+    from: {id: from.sessionId, name: from.name}
+  });
+  
   if (payload !== undefined) {
-    data = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}, payload: payload});
-  } else {
-    data = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}});
+    data.payload = payload;
   }
-  for (var clientid in socket.clients) {
-    if (socket.clients[clientid].inChat === true && socket.clients[clientid].sessionId !== from.sessionId) {
-      socket.clients[clientid].send(data);
-    }
-  }
+  
+  _(socket.clients).chain()
+    .select(function (client) { return client.inChat === true && client.sessionId !== from.sessionId })
+    .each(function (client) { client.send(data); });
 }
 
 function challengeMessage(target, sender, type) {

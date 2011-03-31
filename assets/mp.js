@@ -31,24 +31,44 @@ var MessageRouter = (function () {
   
 }());
 
+var PageControl = (function () {
+  
+  var PageControl = function () {
+    this.defaultpage = arguments[0];
+    this.pages = {};
+    for (var i = 0, len = arguments.length; i < len; i++) {
+      this.pages[arguments[i]] = $(arguments[i]).hide();
+    }
+    
+    this.pages[this.defaultpage].show();
+    this.currentpage = this.defaultpage;
+  }
+  PageControl.prototype.show = function (id) {
+    this.pages[this.currentpage].hide();
+    this.pages[id].show();
+    this.currentpage = id;
+  }
+  
+  return PageControl;
+  
+}());
+
 $(document).ready(function () {
   
   var myname = store.get("username");
   var myid = null;
   var users = [];
   var challenges = {};
-  var login = $("#login").hide(), chatroom = $("#chatroom").hide(), game = $("#gameroom").hide();
   var board;
   var gamestate;
   
+  var pages = new PageControl("#login", "#chatroom", "#gameroom");
   var socket = new MessageRouter("go.five-sixty.co.uk");
   
   socket.on("connect", function () {
     if (myname !== undefined) {
       setUsername(myname);
       joinChat();
-    } else {
-      login.show();
     }
   });
   
@@ -103,7 +123,7 @@ $(document).ready(function () {
       return (a.name < b.name) ? -1 : ((a.name > b.name) ? 1 : 0);
     });
 
-    $.each(users, function (i, user) {
+    _.each(users, function (user) {
       if (user.id === myid) {
         $("#users ul").append($("<li class=\"me\">"+user.name+"</li>").data("user", user));
       } else {
@@ -129,8 +149,8 @@ $(document).ready(function () {
 
   function displayChallenges() {
     $("#challenges ul").empty();
-    for (var id in challenges) {
-      var challenge = challenges[id], element = $("<li>" + challenge.name + " </li>");
+    _.map(challenges, function (challenge) {
+      var element = $("<li>" + challenge.name + " </li>");
       if (challenge.type === "sent") {
         element.append($("<a href=\"#\">Cancel</a>").click(function () {
           socket.send("cancelChallenge", challenge);
@@ -151,7 +171,7 @@ $(document).ready(function () {
         }));
       }
       $("#challenges ul").append(element);
-    }
+    });
   }
 
   function addChallenge(user, state) {
@@ -168,12 +188,11 @@ $(document).ready(function () {
   
   function joinChat() {          
     socket.send("joinChat");
-    chatroom.show();
+    pages.show("#chatroom");
   }
   
   function leaveChat() {
     socket.send("leaveChat");
-    chatroom.hide();
   }
   
   function setUsername(name) {
@@ -193,7 +212,8 @@ $(document).ready(function () {
   function startGame(side, other) {
     opponent = other;
     leaveChat();
-    game.show();
+    pages.show("#gameroom");
+    
     board = new HTMLBoard($("#game"), side);
     gamestate = new GameLogic(19, 19, board);
     
@@ -223,7 +243,6 @@ $(document).ready(function () {
     $("#gamechat ul").empty();
     board = undefined;
     gamestate = undefined;
-    game.hide();
     joinChat();
   }
   
@@ -231,7 +250,6 @@ $(document).ready(function () {
   
   $("#loginform").submit(function () {
     setUsername($("#name").val());
-    login.hide();
     joinChat();
     
     return false;
