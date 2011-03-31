@@ -110,17 +110,21 @@ socket.on('connection', function(client) {
         acceptChallenge(socket.clients[message.payload.id], client);
         break;
       case "gamemove":
-        if (message.payload.side === "white") {
-          client.game.black.send(data);
-        } else {
-          client.game.white.send(data);
+        if (client.game) {
+          if (message.payload.side === "white") {
+            client.game.black.send(data);
+          } else {
+            client.game.white.send(data);
+          }
         }
         break;
       case "gamemessage":
-        if (client.game.black.sessionId === client.sessionId) {
-          client.game.white.send(data);
-        } else {
-          client.game.black.send(data);
+        if (client.game) {
+          if (client.game.black.sessionId === client.sessionId) {
+            client.game.white.send(data);
+          } else {
+            client.game.black.send(data);
+          }
         }
         break;
       case "gameleave":
