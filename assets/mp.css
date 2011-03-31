@@ -8,7 +8,7 @@ body {
   width: 200px;
   overflow: auto;
 }
-#leftpanel h2 {
+#leftpanel h2, #gameroom h2 {
   height: 30px;
   margin: 0;
   padding: 0;
@@ -43,11 +43,11 @@ body {
 #chatbox {
   width: 400px;
 }
-#chat ul, #users ul, #challenges ul {
+#chat ul, #users ul, #challenges ul, #gamechat ul {
   margin: 0;
   padding: 0;
 }
-#chat li, #users li, #challenges li {
+#chat li, #users li, #challenges li, #gamechat li {
   list-style: none;
   margin: 3px 0 3px 0;
   padding: 5px;
@@ -72,6 +72,12 @@ body {
 }
 #gamechatbox {
   height: 20px;
+}
+#gamechatinput {
+  width: 200px;
+}
+#gamechatsubmit {
+  display: none;
 }
 #gamebuttons {
   height: 20px;

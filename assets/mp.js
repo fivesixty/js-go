@@ -63,6 +63,7 @@ $(document).ready(function () {
   
   socket.route("myid", function (payload) {
     myid = payload;
+    displayUsers();
   });
   
   socket.route("sendChallenge", function (payload) {
@@ -94,14 +95,6 @@ $(document).ready(function () {
     displayUsers();
     
     removeChallenge(from);
-  });
-  
-  socket.on('disconnect', function() {
-    users = [];
-    challenges = {};
-    displayUsers();
-    displayChallenges();
-    systemMessage("You got disconnected.");
   });
   
   function displayUsers() {
@@ -260,6 +253,17 @@ $(document).ready(function () {
       $("#gamechatinput").val("");
     }
     return false;
+  });
+  
+  socket.on('disconnect', function() {
+    users = [];
+    challenges = {};
+    displayUsers();
+    displayChallenges();
+    systemMessage("You got disconnected.");
+    if (gamestate !== undefined) {
+      displayGameMessage({name:"System"}, "You got disconnected.")
+    }
   });
   
 });

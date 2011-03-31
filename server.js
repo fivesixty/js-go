@@ -141,7 +141,7 @@ socket.on('connection', function(client) {
         break;
     }
     
-  }); 
+  });
   client.on('disconnect', function(){
     client.inChat = false;
     if (client.game) {
