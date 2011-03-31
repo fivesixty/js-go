@@ -24,14 +24,6 @@ function htmlEscape(text) {
 // socket.io 
 var socket = io.listen(server);
 
-function broadcastMessage(client, message) {
-  for (var clientid in socket.clients) {
-    if (socket.clients[clientid].inChat === true) {
-      socket.clients[clientid].send(JSON.stringify({type:"chatmessage", payload:{user: client.name, message: message}}));
-    }
-  }
-}
-
 function getChatters(callback) {
   var chatters = [];
   for (var clientid in socket.clients) {
@@ -43,38 +35,22 @@ function getChatters(callback) {
 }
 
 function broadcastToChatters(message, from, payload) {
-  var chatters = getChatters(function (id, client) {
-    return {id:id,name:client.name};
-  });
+  var data;
   if (payload !== undefined) {
-    payload = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}, payload: payload});
+    data = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}, payload: payload});
   } else {
-    payload = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}});
+    data = JSON.stringify({type:message, from: {id:from.sessionId,name:from.name}});
   }
-  for (var i = 0, len = chatters.length; i < len; i++) {
-    if (chatters[i].id !== from.sessionId) {
-      socket.clients[chatters[i].id].send(payload);
+  for (var clientid in socket.clients) {
+    if (socket.clients[clientid].inChat === true && socket.clients[clientid].sessionId !== from.sessionId) {
+      socket.clients[clientid].send(data);
     }
   }
 }
 
-function sendChallenge(target, sender) {
+function challengeMessage(target, sender, type) {
   target.send(JSON.stringify({
-    type:"sendChallenge",
-    payload: {id:sender.sessionId, name:sender.name}
-  }));
-}
-
-function denyChallenge(target, sender) {
-  target.send(JSON.stringify({
-    type:"denyChallenge",
-    payload: {id:sender.sessionId, name:sender.name}
-  }));
-}
-
-function cancelChallenge(target, sender) {
-  target.send(JSON.stringify({
-    type:"cancelChallenge",
+    type: type,
     payload: {id:sender.sessionId, name:sender.name}
   }));
 }
@@ -84,13 +60,10 @@ function acceptChallenge(target, sender) {
   sender.game = game;
   target.game = game;
   
-  target.send(JSON.stringify({
-    type:"acceptChallenge",
-    payload: {id:sender.sessionId, name:sender.name}
-  }));
+  challengeMessage(target, sender, "acceptChallenge");
 }
 
-socket.on('connection', function(client){ 
+socket.on('connection', function(client) { 
   
   client.inChat = false;
   
@@ -123,14 +96,15 @@ socket.on('connection', function(client){
       case "sendChat":
         broadcastToChatters("usermessage", client, htmlEscape(message.payload));
         break;
+        
       case "sendChallenge":
-        sendChallenge(socket.clients[message.payload.id], client);
+        challengeMessage(socket.clients[message.payload.id], client, "sendChallenge");
         break;
       case "cancelChallenge":
-        cancelChallenge(socket.clients[message.payload.id], client);
+        challengeMessage(socket.clients[message.payload.id], client, "cancelChallenge");
         break;
       case "denyChallenge":
-        denyChallenge(socket.clients[message.payload.id], client);
+        challengeMessage(socket.clients[message.payload.id], client, "denyChallenge");
         break;
       case "acceptChallenge":
         acceptChallenge(socket.clients[message.payload.id], client);
