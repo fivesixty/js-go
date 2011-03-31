@@ -2,12 +2,13 @@ var CELL_SIZE = 25;
 
 var HTMLBoard = (function () {
   
-  var renderer = function (gamediv) {
+  var renderer = function (gamediv, side) {
     this.gamediv = gamediv;
     this.board = $("<div id=\"board\"></div>");
     this.gamediv.append(this.board);
     this.statuspanel = $("<div id=\"status\"></div>");
     this.gamediv.append(this.statuspanel);
+    this.side = side;
   };
   
   renderer.prototype.init = function (w, h, state) {
@@ -35,7 +36,7 @@ var HTMLBoard = (function () {
     var $this = this;
     $(".square", this.gamediv).live('click', function () {
       var t = $(this);
-      $this.cellClicked($this.state.getPlayerTurn(), t.data('x'), t.data('y'));
+      $this.cellClicked($this.side, t.data('x'), t.data('y'));
     });
   };
   
@@ -210,8 +211,11 @@ var GameLogic = (function () {
       this.state.makeMove(x, y);
       this.checkGroup(x, y, true);
       this.renderer.redraw();
+      this.madeMove(player, x, y);
     }
   }
+  
+  logic.prototype.madeMove = function (side, x, y) { }
   
   // Set a group of locations to empty.
   logic.prototype.removeGroup = function (members) {

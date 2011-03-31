@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="go.css">
+    <link rel="stylesheet" href="mp.css">
+    <script src="json.js"></script>
+    <script src="dateformat.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+    <script src="https://github.com/marcuswestin/store.js/raw/master/store.js"></script>
+    <script src="go.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="mp.js"></script>
+  </head>
+  <body>
+    <div id="login">
+      <form id="loginform">
+        <input id="name" type="text">
+        <input type="submit" value="login">
+      </form>
+    </div>
+    
+    <div id="chatroom">
+      <div id="leftpanel">
+        <div id="users">
+          <h2>Users</h2>
+          <div id="userspanel">
+            <ul></ul>
+          </div>
+        </div>
+        <div id="challenges">
+          <h2>Challenges</h2>
+          <div id="challengepanel">
+            <ul></ul>
+          </div>
+        </div>
+      </div>
+      <div id="rightpanel">
+        <div id="chat">
+          <ul>
+          </ul>
+        </div>
+        <div id="chatinput">
+          <form id="chatform">
+            <input id="chatbox" type="text">
+            <input type="submit" value="send">
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div id="gameroom">
+      <div id="game">
+
+      </div>
+      <div id="gamepanel">
+        <div id="gamechat">
+          <ul></ul>
+        </div>
+        <div id="gamechatbox">
+          <form>
+            <input id="gamechatinput" type="text">
+            <input type="submit" value="send">
+          </form>
+        </div>
+        <div id="gamebuttons">
+          <input type="button" id="gameleave" value="Leave Game">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

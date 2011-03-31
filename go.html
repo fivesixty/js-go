@@ -6,8 +6,16 @@
     <script src="assets/go.js"></script>
     <script>
       $(document).ready(function () {
-        var board = new HTMLBoard($("#game"));
+        var board = new HTMLBoard($("#game"), "black");
         window.game = new GameLogic(19, 19, board);
+        
+        window.game.madeMove = function (side, x, y) {
+          if (side === "white") {
+            board.side = "black";
+          } else {
+            board.side = "white";
+          }
+        }
       });
     </script>
   </head>
