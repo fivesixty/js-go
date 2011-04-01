@@ -210,6 +210,9 @@ $(document).ready(function () {
   var opponent;
   
   function startGame(side, other) {
+    challenges = {};
+    displayChallenges();
+    
     opponent = other;
     leaveChat();
     pages.show("#gameroom");

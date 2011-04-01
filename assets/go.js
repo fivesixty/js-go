@@ -41,7 +41,9 @@ var HTMLBoard = (function () {
   };
   
   renderer.prototype.genStatus = function () {
-    return "Turn: " + this.state.turn + " (" + this.state.getPlayerTurn() + ").";
+    return ("Turn: " + this.state.turn + " (" + this.state.getPlayerTurn() + "). &nbsp; " +
+            "White score: " + (this.state.whiteCount + this.state.blackCaptured) + " &nbsp; " +
+            "Black score: " + (this.state.blackCount + this.state.whiteCaptured));
   }
   
   renderer.prototype.cellClicked = function (x, y) {
@@ -126,6 +128,8 @@ var BoardState = (function () {
     this.turn = 1;
     this.whiteCaptured = 0;
     this.blackCaptured = 0;
+    this.whiteCount = 0;
+    this.blackCount = 0;
     
     // Initialise board state
     for (var x = 0; x < this.width; ++x) {
@@ -163,17 +167,21 @@ var BoardState = (function () {
     }
     this.setWhite = function (x, y) {
       state[x][y] = "w";
+      this.whiteCount++;
       dirty.push([x, y]);
     }
     this.setBlack = function (x, y) {
       state[x][y] = "b";
+      this.blackCount++;
       dirty.push([x, y]);
     }
     this.setEmpty = function (x, y) {
       if (state[x][y] === "b") {
         this.blackCaptured++;
+        this.blackCount--;
       } else if (state[x][y] === "w") {
         this.whiteCaptured++;
+        this.whiteCount--;
       }
       state[x][y] = "e";
       
