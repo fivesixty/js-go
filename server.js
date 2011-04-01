@@ -138,15 +138,21 @@ var GameClient = (function () {
   }
   
   GameClient.prototype.sendChallenge = function (message) {
-    clientIndex[message.payload.id].socketSend("sendChallenge", this.idObj());
+    if (clientIndex[message.payload.id] !== undefined) {
+      clientIndex[message.payload.id].socketSend("sendChallenge", this.idObj());
+    }
   }
   
   GameClient.prototype.cancelChallenge = function (message) {
-    clientIndex[message.payload.id].socketSend("cancelChallenge", this.idObj());
+    if (clientIndex[message.payload.id] !== undefined) {
+      clientIndex[message.payload.id].socketSend("cancelChallenge", this.idObj());
+    }
   }
   
   GameClient.prototype.denyChallenge = function (message) {
-    clientIndex[message.payload.id].socketSend("denyChallenge", this.idObj());
+    if (clientIndex[message.payload.id] !== undefined) {
+      clientIndex[message.payload.id].socketSend("denyChallenge", this.idObj());
+    }
   }
   
   GameClient.prototype.acceptChallenge = function (message) {
